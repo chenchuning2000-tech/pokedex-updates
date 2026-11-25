@@ -1,0 +1,7 @@
+{
+  "version": "2.4.1",
+  "url": "https://raw.githubusercontent.com/chenchuning2000-tech/pokedex-updates/main/pokedex-2.4.1.zip",
+  "sha256": "8372735d920c5f1d605036fe96e1553aca03de473f06464a78b44e0ac7ded25c",
+  "size": 101941,
+  "notes": "内置软件更新源；支持版本检查、升级包校验、重启安装及升级前备份，保留本地卡牌数据与设置。"
+}
