@@ -1,0 +1,57 @@
+name: Build Windows standalone
+on:
+  push:
+    paths: ['build-input.zip', '.github/workflows/build-windows.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Extract source
+        shell: pwsh
+        run: Expand-Archive build-input.zip -DestinationPath source
+      - name: Test and build
+        working-directory: source
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -q
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install pyinstaller==6.11.1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m PyInstaller --clean --noconfirm --onefile --name Pokedex --add-data "web;web" --hidden-import tools.build_zh_names desktop.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Smoke test native executable
+        working-directory: source
+        shell: pwsh
+        run: python tools/test_windows_exe.py
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force portable | Out-Null
+          Copy-Item source/dist/Pokedex.exe portable/Pokedex.exe
+          Copy-Item source/version.json portable/version.json
+          Copy-Item source/install-task.ps1 portable/install-task.ps1
+          Copy-Item source/*.bat portable/
+          python -c "import pathlib; pathlib.Path('portable/README.txt').write_text('Extract all files, then double-click Pokedex.exe. No Python installation required. Keep your existing data folder beside the EXE.',encoding='utf-8')"
+          $version = (Get-Content source/version.json | ConvertFrom-Json).version
+          Compress-Archive portable/* "pokedex-windows-$version.zip"
+          python -c "import json,hashlib,pathlib; v=json.load(open('source/version.json'))['version']; p=pathlib.Path('pokedex-windows-'+v+'.zip'); json.dump(dict(version=v,url='https://github.com/chenchuning2000-tech/pokedex-updates/releases/download/v'+v+'/'+p.name,sha256=hashlib.sha256(p.read_bytes()).hexdigest(),size=p.stat().st_size,notes='Windows standalone edition. Python is included. Local data and settings are preserved.'),open('latest-windows.json','w'),indent=2)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokedex-windows
+          path: |
+            pokedex-windows-*.zip
+            latest-windows.json
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $version = (Get-Content source/version.json | ConvertFrom-Json).version
+          gh release create "v$version" "pokedex-windows-$version.zip" latest-windows.json --title "Pokedex $version Windows standalone" --notes "Double-click Pokedex.exe. Python is included. Keep your existing data folder beside the EXE."
