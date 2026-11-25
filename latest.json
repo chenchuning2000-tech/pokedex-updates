@@ -1,7 +1,7 @@
 {
-  "version": "2.4.1",
-  "url": "https://raw.githubusercontent.com/chenchuning2000-tech/pokedex-updates/main/pokedex-2.4.1.zip",
-  "sha256": "8372735d920c5f1d605036fe96e1553aca03de473f06464a78b44e0ac7ded25c",
-  "size": 101941,
-  "notes": "内置软件更新源；支持版本检查、升级包校验、重启安装及升级前备份，保留本地卡牌数据与设置。"
+  "version": "2.5.0",
+  "url": "https://raw.githubusercontent.com/chenchuning2000-tech/pokedex-updates/main/pokedex-2.5.0.zip",
+  "sha256": "bdcfd93ca351b583c3d5f87381ce2819869cdc8f7c63f545788d1de8467b2862",
+  "size": 7118291,
+  "notes": "30周年视觉版：外围拼贴背景、居中淡水印、皮卡丘30周年标志与精灵球 O 标题；保留卡牌数据和设置。"
 }
